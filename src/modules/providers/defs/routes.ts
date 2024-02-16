@@ -1,6 +1,6 @@
 import { CrudRoutes } from '@common/defs/types';
 
-const prefix = '/users';
+const prefix = '/providers';
 const Routes: CrudRoutes = {
   ReadAll: prefix,
   ReadOne: prefix + '/{id}',

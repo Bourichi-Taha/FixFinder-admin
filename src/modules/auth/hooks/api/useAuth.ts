@@ -7,7 +7,7 @@ import useSWR from 'swr';
 export interface LoginInput {
   email: string;
   password: string;
-  admin?: boolean;
+  admin: boolean;
 }
 
 export interface RegisterInput {
