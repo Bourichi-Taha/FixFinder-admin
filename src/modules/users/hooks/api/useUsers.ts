@@ -12,20 +12,44 @@ export interface CreateOneInput {
   lastname: string;
   phone: string;
   avatarId:Id;
-  loacationId:Id;
-  rating:string;
+  locationId:Id;
+  rating?:number;
+  avatar:File;
+  name?: string;
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+  userId?: Id;
+  description?: string;
+  hourlyRate?: number;
 }
 
 export interface UpdateOneInput {
   email: string;
-  password?: string;
+  password: string;
   role: ROLE;
   firstname: string;
   lastname: string;
   phone: string;
   avatarId:Id;
-  loacationId:Id;
-  rating:string;
+  locationId:Id;
+  rating?:number;
+  avatar:File;
+  name?: string;
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+  userId?: Id;
+  description?: string;
+  hourlyRate?: number;
 }
 
 export type UpsertOneInput = CreateOneInput | UpdateOneInput;

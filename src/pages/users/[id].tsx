@@ -13,6 +13,7 @@ import { CRUD_ACTION, Id } from '@common/defs/types';
 import Namespaces from '@common/defs/namespaces';
 import Labels from '@common/defs/labels';
 import UpdateUserForm from '@modules/users/components/partials/UpdateUserForm';
+import { ROLE } from '@modules/permissions/defs/types';
 
 const UsersPage: NextPage = () => {
   const router = useRouter();
@@ -57,7 +58,7 @@ const UsersPage: NextPage = () => {
         ]}
       />
 
-      {item && <UpdateUserForm item={item} />}
+      {item && item?.rolesNames[0] !== ROLE.PROVIDER && <UpdateUserForm item={item} />}{/* need to add provider update form */}
     </>
   );
 };

@@ -1,4 +1,5 @@
 import ApiRoutes from '@common/defs/apiRoutes';
+import { Id } from '@common/defs/types';
 import useApi, { ApiOptions, ApiResponse, FetchApiOptions } from '@common/hooks/useApi';
 import { User } from '@modules/users/defs/types';
 import { useState } from 'react';
@@ -8,6 +9,13 @@ export interface LoginInput {
   email: string;
   password: string;
   admin: boolean;
+}
+
+export interface VerifyInput {
+  hash: string;
+  id: Id;
+  signature: string;
+  expires: string;
 }
 
 export interface RegisterInput {
@@ -32,10 +40,14 @@ interface AuthData {
     _input: LoginInput,
     _options?: FetchApiOptions
   ) => Promise<ApiResponse<{ token: string }>>;
+  verify: (
+    _input: VerifyInput,
+    _options?: FetchApiOptions
+  ) => Promise<ApiResponse<null>>;
   register: (
     _input: RegisterInput,
     _options?: FetchApiOptions
-  ) => Promise<ApiResponse<{ token: string }>>;
+  ) => Promise<ApiResponse<null>>;
   logout: (_options?: FetchApiOptions) => Promise<ApiResponse<null>>;
   requestPasswordReset: (
     _input: RequestPasswordResetInput,
@@ -59,6 +71,7 @@ const useAuth = (): AuthData => {
       logout: async () => ({ success: false, errors: ['Auth is disabled'] }),
       requestPasswordReset: async () => ({ success: false, errors: ['Auth is disabled'] }),
       resetPassword: async () => ({ success: false, errors: ['Auth is disabled'] }),
+      verify: async () => ({ success: false, errors: ['Auth is disabled'] }),
     };
   }
 
@@ -99,15 +112,27 @@ const useAuth = (): AuthData => {
 
     return response;
   };
-
-  const register = async (input: RegisterInput, options?: FetchApiOptions) => {
-    const response = await fetchApi<{ token: string }>(ApiRoutes.Auth.Register, {
+  const verify = async (input: VerifyInput, options?: FetchApiOptions) => {
+    const response = await fetchApi<null>(ApiRoutes.Auth.Verify.replace('{expires}',input.expires).replace('{hash}',input.hash).replace('{id}',input.id.toString()).replace('{signature}',input.signature), {
       body: input,
       ...options,
     });
 
-    if (response.success && response.data?.token) {
-      localStorage.setItem('authToken', response.data.token);
+    if (response.success && response.data) {
+      mutate();
+
+    }
+
+    return response;
+  };
+
+  const register = async (input: RegisterInput, options?: FetchApiOptions) => {
+    const response = await fetchApi<null>(ApiRoutes.Auth.Register, {
+      body: input,
+      ...options,
+    });
+
+    if (response.success && response.data) {
       mutate();
     }
 
@@ -148,6 +173,7 @@ const useAuth = (): AuthData => {
     requestPasswordReset,
     resetPassword,
     initialized,
+    verify
   };
 };
 

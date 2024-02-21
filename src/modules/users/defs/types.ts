@@ -12,7 +12,8 @@ export interface User extends CrudObject {
   phone: string;
   avatarId:Id;
   loacationId:Id;
-  rating:string;
-  location:Location;
-  avatar:Upload;
+  rating?:number;
+  location?:Location;
+  avatar?:Upload;
+  emailVerifiedAt:string;
 }

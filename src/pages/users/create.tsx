@@ -8,6 +8,7 @@ import { CRUD_ACTION } from '@common/defs/types';
 import Namespaces from '@common/defs/namespaces';
 import Labels from '@common/defs/labels';
 import CreateUserStepper from '@modules/users/components/partials/CreateUserStepper';
+import CreateUserForm from '@modules/users/components/partials/CreateUserForm';
 
 const UsersPage: NextPage = () => {
   return (
@@ -20,8 +21,8 @@ const UsersPage: NextPage = () => {
           { name: Labels.Users.NewOne },
         ]}
       />
-      <CreateUserStepper />
-      {/* <CreateUserForm /> */}
+      {/* <CreateUserStepper /> */}
+      <CreateUserForm />
     </>
   );
 };

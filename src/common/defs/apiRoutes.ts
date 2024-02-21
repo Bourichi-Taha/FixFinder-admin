@@ -6,6 +6,7 @@ import Categories from '@modules/categories/defs/apiRoutes';
 import Bookings from '@modules/bookings/defs/apiRoutes';
 import Reviews from '@modules/reviews/defs/apiRoutes';
 import Notifications from '@modules/notifications/defs/apiRoutes';
+import Locations from '@modules/locations/defs/apiRoutes';
 
 const ApiRoutes = {
   Auth,
@@ -16,6 +17,7 @@ const ApiRoutes = {
   Bookings,
   Reviews,
   Notifications,
+  Locations,
 };
 
 export default ApiRoutes;

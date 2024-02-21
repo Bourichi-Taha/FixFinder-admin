@@ -1,10 +1,9 @@
-import { Id } from '@common/defs/types';
-import { User } from '@modules/users/defs/types';
+import { CrudObject, Id } from '@common/defs/types';
 
-export interface Provider extends User {
+export interface Provider extends CrudObject {
   userId: Id;
   description:string;
-  availability_schedule:string;
-  hourly_rate:number;
-  average_rating:number;
+  availabilitySchedule:string;
+  hourlyRate:number;
+  averageRating:number;
 }
