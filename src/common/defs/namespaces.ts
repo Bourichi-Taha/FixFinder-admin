@@ -3,6 +3,7 @@ import Notifications from '@modules/notifications/defs/namespace';
 import Reviews from '@modules/reviews/defs/namespace';
 import Bookings from '@modules/bookings/defs/namespace';
 import Categories from '@modules/categories/defs/namespace';
+import Services from '@modules/services/defs/namespace';
 import Providers from '@modules/providers/defs/namespace';
 
 const Namespaces = {
@@ -12,6 +13,7 @@ const Namespaces = {
   Bookings,
   Categories,
   Providers,
+  Services
 };
 
 export default Namespaces;

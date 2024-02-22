@@ -10,6 +10,8 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
+import CategoryIcon from '@mui/icons-material/Category';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
@@ -91,6 +93,24 @@ const Leftbar = (props: LeftbarProps) => {
           namespace: Namespaces.Providers,
           routes: Routes.Providers,
           labels: Labels.Providers,
+        },
+        managementGroup
+      );
+      pushCrudNavItem(
+        {
+          icon: <CategoryIcon />,
+          namespace: Namespaces.Categories,
+          routes: Routes.Categories,
+          labels: Labels.Categories,
+        },
+        managementGroup
+      );
+      pushCrudNavItem(
+        {
+          icon: <MiscellaneousServicesIcon />,
+          namespace: Namespaces.Services,
+          routes: Routes.Services,
+          labels: Labels.Services,
         },
         managementGroup
       );
