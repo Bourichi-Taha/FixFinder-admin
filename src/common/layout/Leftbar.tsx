@@ -10,6 +10,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import { pxToRem } from '@common/theme/typography';
@@ -81,6 +82,15 @@ const Leftbar = (props: LeftbarProps) => {
           namespace: Namespaces.Users,
           routes: Routes.Users,
           labels: Labels.Users,
+        },
+        managementGroup
+      );
+      pushCrudNavItem(
+        {
+          icon: <ManageAccountsIcon />,
+          namespace: Namespaces.Providers,
+          routes: Routes.Providers,
+          labels: Labels.Providers,
         },
         managementGroup
       );

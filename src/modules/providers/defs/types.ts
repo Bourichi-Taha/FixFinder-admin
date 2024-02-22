@@ -1,4 +1,5 @@
 import { CrudObject, Id } from '@common/defs/types';
+import { User } from '@modules/users/defs/types';
 
 export interface Provider extends CrudObject {
   userId: Id;
@@ -6,4 +7,5 @@ export interface Provider extends CrudObject {
   availabilitySchedule:string;
   hourlyRate:number;
   averageRating:number;
+  user:User;
 }

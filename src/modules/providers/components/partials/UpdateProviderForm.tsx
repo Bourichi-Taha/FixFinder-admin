@@ -1,12 +1,12 @@
 import FormProvider, { RHFSelect, RHFTextField } from '@common/components/lib/react-hook-form';
 import RHFImageDropzone from '@common/components/lib/react-hook-form/RHFImageDropzone';
 import RHFPhoneField from '@common/components/lib/react-hook-form/RHFPhoneField';
-import UpdateCrudItemForm from '@common/components/partials/UpdateCrudItemForm';
 import Routes from '@common/defs/routes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import useLocations from '@modules/locations/hooks/api/useLocations';
 import { ROLES_OPTIONS } from '@modules/permissions/defs/options';
 import { ROLE } from '@modules/permissions/defs/types';
+import { Provider } from '@modules/providers/defs/types';
 import useProviders from '@modules/providers/hooks/api/useProviders';
 import useUploads from '@modules/uploads/hooks/api/useUploads';
 import { User } from '@modules/users/defs/types';
@@ -15,20 +15,20 @@ import { LockOpen } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Box, Card, Grid, MenuItem } from '@mui/material';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 
-interface UpdateUserFormProps {
-  item: User;
+interface UpdateProviderFormProps {
+  item: Provider;
 }
 
-const UpdateUserForm = (props: UpdateUserFormProps) => {
+const UpdateProviderForm = (props: UpdateProviderFormProps) => {
   const { item } = props;
   const router = useRouter();
   const { updateOne: updateOneUpload } = useUploads();
   const { updateOne: updateOneLocation } = useLocations();
   const { updateOne: updateOneUser } = useUsers();
+  const { updateOne: updateOneProvider } = useProviders();
   const schema = Yup.object().shape({
     email: Yup.string()
       .email("Le format de l'email est incorrect")
@@ -36,13 +36,6 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
     password: Yup.string(),
     phone: Yup.string().required('Le champ est obligatoire'),
     firstname: Yup.string().required('Le champ est obligatoire'),
-    role: Yup.mixed<ROLE>()
-      .oneOf(Object.values(ROLE), (_values) => {
-        return `Le champ doit avoir l'une des valeurs suivantes : ${ROLES_OPTIONS.map(
-          (option) => option.label
-        ).join(', ')}`;
-      })
-      .required('Le champ est obligatoire'),
     avatar: Yup.mixed().test('fileType', 'Format de fichier non valide', (value) => {
       if (!value) {
         return true; // No file provided, so no validation needed
@@ -73,21 +66,24 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
   const methods = useForm<UpdateOneInput>({
     resolver: yupResolver(schema),
     defaultValues: {
-      email: item.email || '',
-      password: item.password || '',
-      firstname: item.firstname || '',
-      lastname: item.lastname || '',
-      phone: item.phone || '',
-      role: item.rolesNames[0] || '',
-      avatarId: item.avatarId || 0,
-      locationId: item.locationId || 0,
-      address: item.location?.address || '',
-      city: item.location?.city || '',
-      country: item.location?.country || '',
-      latitude: item.location?.latitude || undefined,
-      longitude: item.location?.longitude || undefined,
-      postalCode: item.location?.postalCode || '',
-      state: item.location?.state || '',
+      email: item.user.email || '',
+      password: item.user.password || '',
+      firstname: item.user.firstname || '',
+      lastname: item.user.lastname || '',
+      phone: item.user.phone || '',
+      role: ROLE.PROVIDER,
+      avatarId: item.user.avatarId || 0,
+      locationId: item.user.locationId || 0,
+      address: item.user.location?.address || '',
+      city: item.user.location?.city || '',
+      country: item.user.location?.country || '',
+      latitude: item.user.location?.latitude || undefined,
+      longitude: item.user.location?.longitude || undefined,
+      postalCode: item.user.location?.postalCode || '',
+      state: item.user.location?.state || '',
+      description: item.description || '',
+      availabilitySchedule: item.availabilitySchedule || '',
+      hourlyRate: item.hourlyRate || 0,
     },
   });
 
@@ -117,11 +113,14 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
     if (locationResponse.data) {
       data.locationId = locationResponse.data?.item.id;
     }
-    const response = await updateOneUser(item.id, data, {
-      displayProgress: true,
-      displaySuccess: true,
-    });
-    router.push(Routes.Users.ReadAll);
+    const response = await updateOneUser(item.userId, data);
+    if (response.data) {
+      await updateOneProvider(item.id, { userId: response.data?.item.id, description: data.description, hourlyRate: data.hourlyRate, availabilitySchedule: data.availabilitySchedule }, {
+        displayProgress: true,
+        displaySuccess: true,
+      });
+    }
+    router.push(Routes.Providers.ReadAll);
   };
   return (
     <>
@@ -144,7 +143,7 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
                     transition: 'all 0.3s',
                   }}
                 >
-                  {item.avatar && (
+                  {item.user.avatar && (
                     <Box
                       component="img"
                       sx={{
@@ -155,7 +154,7 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
                         position: 'inherit !important',
                       }}
                       alt="avatar."
-                      src={process.env.NEXT_PUBLIC_API_URL + item.avatar.path}
+                      src={process.env.NEXT_PUBLIC_API_URL + item.user.avatar.path}
                     />
                   )}
                 </Box>
@@ -191,17 +190,17 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
             <Grid item xs={12} sm={12} md={6}>
               <RHFTextField name="password" label={"password"} type="password" />
             </Grid>
-            <Grid item xs={12} sm={12} md={6}>
-              <RHFSelect name="role" label="Rôle">
-                {ROLES_OPTIONS.map((option) => (
-                  <MenuItem key={option.value} disabled={option.value === ROLE.PROVIDER} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
-            </Grid>
             <Grid item xs={12} sm={12} md={12}>
               <RHFTextField name="address" label={"address"} minRows={2} maxRows={3} multiline />
+            </Grid>
+            <Grid item xs={12} sm={12} md={12}>
+              <RHFTextField name="description" label={"description"} minRows={2} maxRows={3} multiline />
+            </Grid>
+            <Grid item xs={12} sm={12} md={6}>
+              <RHFTextField name="hourlyRate" label={"hourlyRate"} type='number' />
+            </Grid>
+            <Grid item xs={12} sm={12} md={6}>
+              <RHFTextField name="availabilitySchedule" label={"availabilitySchedule"} />
             </Grid>
             <Grid item xs={12} sx={{ textAlign: 'center' }}>
               <LoadingButton
@@ -222,4 +221,4 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
   );
 };
 
-export default UpdateUserForm;
+export default UpdateProviderForm;

@@ -14,7 +14,6 @@ import { LockOpen } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Card, Grid, MenuItem } from '@mui/material';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 

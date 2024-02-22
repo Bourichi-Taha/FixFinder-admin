@@ -2,8 +2,10 @@ import ApiRoutes from '@common/defs/apiRoutes';
 import useItems, { UseItems, UseItemsOptions, defaultOptions } from '@common/hooks/useItems';
 import { Id } from '@common/defs/types';
 import { Provider } from '@modules/providers/defs/types';
+import { User } from '@modules/users/defs/types';
 export interface CreateOneInput  {
     userId: Id;
+    user?:User,
     description?: string;
     availabilitySchedule?: string;
     hourlyRate?: number;
@@ -12,6 +14,7 @@ export interface CreateOneInput  {
 
 export interface UpdateOneInput  {
     userId: Id;
+    user?:User,
     description?: string;
     availabilitySchedule?: string;
     hourlyRate?: number;

@@ -25,7 +25,9 @@ export interface CreateOneInput {
   longitude?: number;
   userId?: Id;
   description?: string;
+  availabilitySchedule?: string;
   hourlyRate?: number;
+  averageRating?: number;
 }
 
 export interface UpdateOneInput {
@@ -49,7 +51,9 @@ export interface UpdateOneInput {
   longitude?: number;
   userId?: Id;
   description?: string;
+  availabilitySchedule?: string;
   hourlyRate?: number;
+  averageRating?: number;
 }
 
 export type UpsertOneInput = CreateOneInput | UpdateOneInput;

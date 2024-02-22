@@ -1,48 +1,38 @@
 import FormProvider, { RHFSelect, RHFTextField } from '@common/components/lib/react-hook-form';
 import RHFImageDropzone from '@common/components/lib/react-hook-form/RHFImageDropzone';
 import RHFPhoneField from '@common/components/lib/react-hook-form/RHFPhoneField';
-import UpdateCrudItemForm from '@common/components/partials/UpdateCrudItemForm';
 import Routes from '@common/defs/routes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import useLocations from '@modules/locations/hooks/api/useLocations';
+import useGetLocation from '@modules/locations/hooks/useGetLoacation';
 import { ROLES_OPTIONS } from '@modules/permissions/defs/options';
 import { ROLE } from '@modules/permissions/defs/types';
 import useProviders from '@modules/providers/hooks/api/useProviders';
 import useUploads from '@modules/uploads/hooks/api/useUploads';
-import { User } from '@modules/users/defs/types';
-import useUsers, { UpdateOneInput } from '@modules/users/hooks/api/useUsers';
+import useUsers, { CreateOneInput } from '@modules/users/hooks/api/useUsers';
 import { LockOpen } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import { Box, Card, Grid, MenuItem } from '@mui/material';
+import { Card, Grid, MenuItem } from '@mui/material';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as Yup from 'yup';
 
-interface UpdateUserFormProps {
-  item: User;
-}
+interface CreateProviderFormProps { }
 
-const UpdateUserForm = (props: UpdateUserFormProps) => {
-  const { item } = props;
+const CreateProviderForm = (_props: CreateProviderFormProps) => {
   const router = useRouter();
-  const { updateOne: updateOneUpload } = useUploads();
-  const { updateOne: updateOneLocation } = useLocations();
-  const { updateOne: updateOneUser } = useUsers();
+  const { createOne: createOneUpload } = useUploads();
+  const { createOne: createOneLocation } = useLocations();
+  const { createOne: createOneUser } = useUsers();
+  const { createOne: createOneProvider } = useProviders();
+  const { location } = useGetLocation();
   const schema = Yup.object().shape({
     email: Yup.string()
       .email("Le format de l'email est incorrect")
       .required('Le champ est obligatoire'),
-    password: Yup.string(),
+    password: Yup.string().required('Le champ est obligatoire'),
     phone: Yup.string().required('Le champ est obligatoire'),
     firstname: Yup.string().required('Le champ est obligatoire'),
-    role: Yup.mixed<ROLE>()
-      .oneOf(Object.values(ROLE), (_values) => {
-        return `Le champ doit avoir l'une des valeurs suivantes : ${ROLES_OPTIONS.map(
-          (option) => option.label
-        ).join(', ')}`;
-      })
-      .required('Le champ est obligatoire'),
     avatar: Yup.mixed().test('fileType', 'Format de fichier non valide', (value) => {
       if (!value) {
         return true; // No file provided, so no validation needed
@@ -58,36 +48,27 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
         'image/webp',
       ]; // Add more formats as needed
       return acceptedFormats.includes(file.type);
-    }),
+    }).required('Le champ est obligatoire'),
     lastname: Yup.string().required('Le champ est obligatoire'),
-    description: Yup.string(),
+    description: Yup.string().required('Le champ est obligatoire'),
     state: Yup.string(),
     address: Yup.string().required('Le champ est obligatoire'),
     city: Yup.string().required('Le champ est obligatoire'),
     country: Yup.string().required('Le champ est obligatoire'),
     postalCode: Yup.string(),
-    availabilitySchedule: Yup.string(),
-    hourlyRate: Yup.number(),
+    availabilitySchedule: Yup.string().required('Le champ est obligatoire'),
+    hourlyRate: Yup.number().required('Le champ est obligatoire'),
 
   });
-  const methods = useForm<UpdateOneInput>({
+
+  const methods = useForm<CreateOneInput>({
     resolver: yupResolver(schema),
     defaultValues: {
-      email: item.email || '',
-      password: item.password || '',
-      firstname: item.firstname || '',
-      lastname: item.lastname || '',
-      phone: item.phone || '',
-      role: item.rolesNames[0] || '',
-      avatarId: item.avatarId || 0,
-      locationId: item.locationId || 0,
-      address: item.location?.address || '',
-      city: item.location?.city || '',
-      country: item.location?.country || '',
-      latitude: item.location?.latitude || undefined,
-      longitude: item.location?.longitude || undefined,
-      postalCode: item.location?.postalCode || '',
-      state: item.location?.state || '',
+      email: '',
+      password: '',
+      firstname: '',
+      lastname: '',
+      role: ROLE.PROVIDER,
     },
   });
 
@@ -95,16 +76,17 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
     handleSubmit,
     formState: { isSubmitting },
   } = methods;
-  const onSubmit = async (data: UpdateOneInput) => {
+  const onSubmit = async (data: CreateOneInput) => {
     const dataUpload = { file: data.avatar };
-    if (data.avatar) {
-      const uploadResponse = await updateOneUpload(data.avatarId, dataUpload);
-      if (uploadResponse.data) {
-        data.avatarId = uploadResponse.data?.item.id;
-      }
+    const uploadResponse = await createOneUpload(dataUpload);
+    if (uploadResponse.data) {
+      data.avatarId = uploadResponse.data?.item.id;
     }
     let dataLocation;
-    dataLocation = { address: data.address }
+    if (location?.latitude && location.longitude) {
+      dataLocation = { latitude: location.latitude, longitude: location.longitude }
+    }
+    dataLocation = { ...dataLocation, address: data.address }
     dataLocation = { ...dataLocation, city: data.city }
     dataLocation = { ...dataLocation, country: data.country }
     if (data.postalCode) {
@@ -113,55 +95,26 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
     if (data.state) {
       dataLocation = { ...dataLocation, state: data.state }
     }
-    const locationResponse = await updateOneLocation(data.locationId, dataLocation);
+    const locationResponse = await createOneLocation(dataLocation);
     if (locationResponse.data) {
       data.locationId = locationResponse.data?.item.id;
     }
-    const response = await updateOneUser(item.id, data, {
-      displayProgress: true,
-      displaySuccess: true,
-    });
-    router.push(Routes.Users.ReadAll);
+    const response = await createOneUser(data);
+    if (response.data) {
+      await createOneProvider({ userId: response.data?.item.id, description: data.description, hourlyRate: data.hourlyRate }, {
+        displayProgress: true,
+        displaySuccess: true,
+      })
+    }
+    router.push(Routes.Providers.ReadAll);
   };
+
   return (
     <>
       <Card sx={{ maxWidth: '800px', margin: 'auto' }}>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Grid container rowSpacing={3} columnSpacing={2} sx={{ padding: 5 }}>
-            <Grid item md={4} sm={12} gap={3} sx={{ width: '100%' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-                <Box
-                  sx={{
-                    width: '200px',
-                    height: '200px',
-                    borderRadius: '10px',
-                    overflow: 'hidden',
-                    borderWidth: 2,
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.3s',
-                  }}
-                >
-                  {item.avatar && (
-                    <Box
-                      component="img"
-                      sx={{
-                        height: 233,
-                        width: 350,
-                        maxHeight: { xs: 233, md: 167 },
-                        maxWidth: { xs: 350, md: 250 },
-                        position: 'inherit !important',
-                      }}
-                      alt="avatar."
-                      src={process.env.NEXT_PUBLIC_API_URL + item.avatar.path}
-                    />
-                  )}
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item md={8} sm={12}>
+            <Grid item sm={12}>
               <RHFImageDropzone name="avatar" label="Choisir un nouvel avatar" />
             </Grid>
             <Grid item xs={12} sm={12} md={6}>
@@ -191,17 +144,17 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
             <Grid item xs={12} sm={12} md={6}>
               <RHFTextField name="password" label={"password"} type="password" />
             </Grid>
-            <Grid item xs={12} sm={12} md={6}>
-              <RHFSelect name="role" label="Rôle">
-                {ROLES_OPTIONS.map((option) => (
-                  <MenuItem key={option.value} disabled={option.value === ROLE.PROVIDER} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </RHFSelect>
-            </Grid>
             <Grid item xs={12} sm={12} md={12}>
               <RHFTextField name="address" label={"address"} minRows={2} maxRows={3} multiline />
+            </Grid>
+            <Grid item xs={12} sm={12} md={12}>
+              <RHFTextField name="description" label={"description"} minRows={2} maxRows={3} multiline />
+            </Grid>
+            <Grid item xs={12} sm={12} md={6}>
+              <RHFTextField name="hourlyRate" label={"hourlyRate"} type='number' />
+            </Grid>
+            <Grid item xs={12} sm={12} md={6}>
+              <RHFTextField name="availabilitySchedule" label={"availabilitySchedule"} />
             </Grid>
             <Grid item xs={12} sx={{ textAlign: 'center' }}>
               <LoadingButton
@@ -212,7 +165,7 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
                 loadingPosition="start"
                 loading={isSubmitting}
               >
-                Modifier
+                Créer
               </LoadingButton>
             </Grid>
           </Grid>
@@ -222,4 +175,4 @@ const UpdateUserForm = (props: UpdateUserFormProps) => {
   );
 };
 
-export default UpdateUserForm;
+export default CreateProviderForm;
