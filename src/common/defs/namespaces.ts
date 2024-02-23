@@ -5,6 +5,7 @@ import Bookings from '@modules/bookings/defs/namespace';
 import Categories from '@modules/categories/defs/namespace';
 import Services from '@modules/services/defs/namespace';
 import Providers from '@modules/providers/defs/namespace';
+import Orders from '@modules/orders/defs/namespace';
 
 const Namespaces = {
   Users,
@@ -13,7 +14,8 @@ const Namespaces = {
   Bookings,
   Categories,
   Providers,
-  Services
+  Services,
+  Orders,
 };
 
 export default Namespaces;

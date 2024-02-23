@@ -10,6 +10,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
+import RequestPageIcon from '@mui/icons-material/RequestPage';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import CategoryIcon from '@mui/icons-material/Category';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
@@ -111,6 +112,15 @@ const Leftbar = (props: LeftbarProps) => {
           namespace: Namespaces.Services,
           routes: Routes.Services,
           labels: Labels.Services,
+        },
+        managementGroup
+      );
+      pushCrudNavItem(
+        {
+          icon: <RequestPageIcon />,
+          namespace: Namespaces.Orders,
+          routes: Routes.Orders,
+          labels: Labels.Orders,
         },
         managementGroup
       );

@@ -7,6 +7,7 @@ import Bookings from '@modules/bookings/defs/routes';
 import Categories from '@modules/categories/defs/routes';
 import Services from '@modules/services/defs/routes';
 import Providers from '@modules/providers/defs/routes';
+import Orders from '@modules/orders/defs/routes';
 const Common = {
   Home: '/',
   NotFound: '/404',
@@ -22,7 +23,8 @@ const Routes = {
   Bookings,
   Categories,
   Providers,
-  Services
+  Services,
+  Orders,
 };
 
 export default Routes;
